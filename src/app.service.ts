@@ -1,18 +1,21 @@
 import { Injectable, Req, Request } from '@nestjs/common';
 import axios from 'axios'
+import { BigNumber } from "bignumber.js";
 
 import api_keys from './config/api_keys'
+
+BigNumber.set({ DECIMAL_PLACES: 2 })
 
 @Injectable()
 export class AppService {
   getApiKeyFromVault() {
     return api_keys[Math.floor(Math.random() * (api_keys.length))]
   }
-  async getCryptoPrice(reqParam) {
+  async getCryptoPrice(currencyFrom, currencyTo, amount) {
     try {
       const apiKey = this.getApiKeyFromVault()
-      const cryptoCompareResult = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${reqParam.currencyFrom}&tsyms=${reqParam.currencyTo}&api_key=${apiKey}`)
-      return (cryptoCompareResult.data[reqParam.currencyTo] * reqParam.amount).toFixed(2)
+      const cryptoCompareResult = await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${currencyFrom}&tsyms=${currencyTo}&api_key=${apiKey}`)
+      return new BigNumber((cryptoCompareResult.data[currencyTo] * amount))
     }
     catch (e) {
       return e

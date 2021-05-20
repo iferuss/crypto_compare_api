@@ -1,7 +1,6 @@
-import { Controller, Get, Query, Res, UsePipes, ValidationPipe } from '@nestjs/common';
-import { AppService } from './app.service';
-import { QueryParamDto } from "./dto/app.dto";
-import { Response } from 'express'
+import {Controller, Get, Query, Res, UsePipes, ValidationPipe} from '@nestjs/common';
+import {AppService} from './app.service';
+import {Response} from 'express'
 
 @Controller()
 export class AppController {
@@ -9,16 +8,28 @@ export class AppController {
     }
 
     @Get('getCryptoPrice')
-    @UsePipes(new ValidationPipe())
-    async getCryptoPrice(@Query() reqParam: QueryParamDto, @Res() res: Response): Promise<Response> {
+    // @UsePipes(new ValidationPipe())
+    async getCryptoPrice(@Query('currencyFrom') currencyFrom: string,
+                         @Query('currencyTo') currencyTo: string,
+                         @Query('amount') amount: number,
+                         @Query('api_key') api_key: string,
+                         @Res() res: Response
+    ): Promise<Response> {
         try {
-            const data = await this.appService.getCryptoPrice(reqParam);
-            if (!data) {
-                return res.status(500).json({"error": "Incorrect currency input"})
+            let data;
+            if (api_key === process.env.SERVICE_API_KEY) {
+                data = await this.appService.getCryptoPrice(currencyFrom, currencyTo, amount);
+            } else {
+                throw 'Wrong api key'
+                return
             }
-            return res.json({[reqParam.currencyTo]: data})
+            if (isNaN(data)) {
+                throw "Incorrect currency input"
+                return
+            }
+            return res.json({[currencyTo]: data})
         } catch (e) {
-            return res.sendStatus(500).json(e)
+            return res.json({"error": e})
         }
     }
 }
