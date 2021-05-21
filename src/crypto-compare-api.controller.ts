@@ -1,14 +1,14 @@
 import {Controller, Get, Query, Res, UsePipes, ValidationPipe} from '@nestjs/common';
-import {AppService} from './app.service';
+import {CryptoCompareApiService} from './crypro-compare-api.service';
 import {Response} from 'express'
+import {CryptoCompareApiModule} from "./crypto-compare-api.module";
 
 @Controller()
-export class AppController {
-    constructor(private readonly appService: AppService) {
+export class CryptoCompareApiController {
+    constructor(private readonly appService: CryptoCompareApiService) {
     }
 
     @Get('getCryptoPrice')
-    // @UsePipes(new ValidationPipe())
     async getCryptoPrice(@Query('currencyFrom') currencyFrom: string,
                          @Query('currencyTo') currencyTo: string,
                          @Query('amount') amount: number,
